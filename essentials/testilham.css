@@ -1,0 +1,112 @@
+& when not (@fullScreen) {
+  padding-top: (@paddingTop * 1rem);
+  padding-bottom: (@paddingBottom * 1rem);
+}
+
+& when (@bg-type = "image") {
+  background-image: url(@bg-value);
+}
+
+& when (@bg-type = "color") {
+  background-color: @bg-value;
+}
+
+& when (@reverseContent) {
+
+  .row {
+    flex-direction: row-reverse;
+  }
+}
+
+& when (@fullWidth) {
+
+  & when (@imageFullWidth) {
+
+    .container-fluid {
+      padding: 0;
+    }
+
+    .text-wrapper {
+      padding: 0 4rem;
+
+      @media (max-width: 768px) {
+        padding: 0 2rem;
+      }
+    }
+  }
+}
+
+.image-wrapper {
+
+  @media (max-width: 991px) {
+    margin-bottom: 2rem;
+  }
+
+  img {
+    width: 100%;
+    object-fit: cover;
+  }
+}
+
+.text-wrapper {
+
+  @media (min-width: 992px) {
+    padding: 0 2rem;
+
+    & when (@fullWidth) {
+      padding: 0 4rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    margin-bottom: 2rem;
+  }
+}
+
+.mbr-text, .mbr-section-btn {
+  color: #353535;
+}
+padding-top: (@paddingTop * 1rem);
+padding-bottom: (@paddingBottom * 1rem);
+
+& when (@bg-type = "color") {
+  background-color: @bg-value;
+}
+
+& when (@bg-type = "image") {
+  background-image: url(@bg-value);
+}
+
+@media (min-width: 1500px) {
+
+  .container {
+    max-width: 1400px;
+  }
+}
+
+.mbr-iconfont {
+  display: block;
+  font-size: 5rem;
+  color: @iconColor;
+  margin-bottom: 2rem;
+}
+
+.card-wrapper {
+  margin-top: 3rem;
+}
+
+.row {
+  justify-content: center;
+}
+
+.card-title, .iconfont-wrapper {
+  color: #000000;
+}
+
+.card-text {
+  color: #000000;
+}
+
+.mbr-section-title {
+  color: #000000;
+}
