@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixed Navbar Menu</title>
+    <style>
+        :root{
+          --bg:#0b0e12;
+          --bg-2:#0f141b;
+          --text:#e8edf2;
+          --muted:#93a0ad;
+          --accent:#62d2ff;
+          --line:#212833;
+        }
+
+        /* Base */
+        *{box-sizing:border-box}
+        html,body{height:100%}
+        body{margin:0;background:linear-gradient(180deg,var(--bg),var(--bg-2));color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
+
+        /* Header */
+        .nav{
+          position:sticky;top:0;z-index:1000;
+          display:flex;align-items:center;justify-content:space-between;
+          padding:16px 24px;border-bottom:1px solid rgba(255,255,255,.06);
+          backdrop-filter:saturate(120%) blur(6px);
+          background:rgba(10,14,18,.6);
+        }
+        .brand{color:var(--text);text-decoration:none;font-weight:600;letter-spacing:.02em}
+        .burger{
+          --w:26px; --h:2px;
+          display:inline-flex;flex-direction:column;gap:6px;cursor:pointer;
+          width:36px;height:28px;border:0;background:transparent;padding:4px;align-items:flex-end
+        }
+        .burger:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:6px}
+        .burger span{display:block;width:var(--w);height:var(--h);background:#fff;border-radius:2px;transition:transform .3s ease,opacity .3s ease,width .3s ease}
+        .burger span:nth-child(2){width:20px}
+        .burger.open span:nth-child(1){transform:translateY(8px) rotate(45deg)}
+        .burger.open span:nth-child(2){opacity:0;transform:translateX(6px)}
+        .burger.open span:nth-child(3){transform:translateY(-8px) rotate(-45deg)}
+
+        /* Fullscreen Menu */
+        .menu{position:fixed;inset:0;display:none;z-index:999}
+        .menu.open{display:block}
+        .menu-backdrop{
+          position:absolute;inset:0;background:rgba(8,12,16,.96);
+        }
+        .menu-inner{
+          position:relative;inset:0;height:100%;display:grid;grid-template-columns:1.2fr .8fr;gap:48px;
+          padding:80px clamp(20px,5vw,60px);color:var(--text)
+        }
+
+        /* Left column (links) */
+        .menu-links{list-style:none;margin:0;padding:0}
+        .menu-links > li{margin:0 0 12px 0}
+        .menu-links a,
+        .submenu-toggle{
+          color:var(--text);text-decoration:none;background:none;border:0;cursor:pointer;
+          font-size:clamp(28px,6vw,72px);line-height:1.05;font-weight:600;letter-spacing:.02em
+        }
+        .menu-links a:hover,.submenu-toggle:hover{color:var(--accent)}
+        .has-sub .submenu-toggle{display:inline-flex;align-items:center;gap:12px}
+        .has-sub .submenu{
+          list-style:none;margin:10px 0 22px 0;padding:0 0 0 2px;border-left:2px solid var(--line);
+          max-height:0;overflow:hidden;transition:max-height .35s ease
+        }
+        .has-sub.open .submenu{max-height:320px}
+        .submenu li{margin:8px 0}
+        .submenu a{font-size:clamp(16px,2.2vw,18px);font-weight:500;color:var(--muted)}
+        .submenu a:hover{color:var(--text)}
+
+        /* Right column (meta) */
+        .menu-right{display:flex;flex-direction:column;gap:28px;align-self:flex-start}
+        .meta-block h4{margin:0 0 8px 0;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+        .meta-block p,.meta-block a{margin:0;font-size:15px;color:var(--text);text-decoration:none}
+        .meta-block.small p{color:var(--muted)}
+        .social{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+        .social a{color:var(--text);text-decoration:none}
+        .social a:hover{color:var(--accent)}
+
+        /* Stagger reveal */
+        .menu.open .stagger{opacity:0;transform:translateY(8px);animation:rise .35s ease forwards}
+        .menu.open .stagger:nth-child(1){animation-delay:.05s}
+        .menu.open .stagger:nth-child(2){animation-delay:.10s}
+        .menu.open .stagger:nth-child(3){animation-delay:.15s}
+        .menu.open .stagger:nth-child(4){animation-delay:.20s}
+        .menu.open .stagger:nth-child(5){animation-delay:.25s}
+        @keyframes rise{to{opacity:1;transform:translateY(0)}}
+
+        /* Responsive */
+        @media (max-width:992px){
+          .menu-inner{grid-template-columns:1fr;gap:36px;padding:84px 20px 40px}
+          .menu-right{order:2}
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion:reduce){
+          .burger span{transition:none}
+          .menu.open .stagger{animation:none;opacity:1;transform:none}
+        }
+
+        /* Scroll lock helper */
+        .body-lock{overflow:hidden}
+
+        /* Content for testing */
+        .content {
+          padding: 40px 24px;
+          max-width: 800px;
+          margin: 0 auto;
+        }
+        .content h1 {
+          font-size: 2.5rem;
+          margin-bottom: 1rem;
+        }
+        .content p {
+          line-height: 1.6;
+          margin-bottom: 1rem;
+          color: var(--muted);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sticky Header -->
+    <header class="nav">
+      <a href="#" class="brand">MyBrand</a>
+      <button class="burger" id="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="menu">
+        <span></span><span></span><span></span>
+      </button>
+    </header>
+
+    <!-- Fullscreen Overlay Menu -->
+    <nav id="menu" class="menu" aria-hidden="true">
+      <div class="menu-backdrop" id="menu-backdrop"></div>
+      <div class="menu-inner" role="dialog" aria-modal="true" aria-label="Site navigation">
+        <div class="menu-left">
+          <ul class="menu-links" role="menu">
+            <li class="stagger"><a href="#" role="menuitem">Home</a></li>
+            <li class="stagger has-sub">
+              <button class="submenu-toggle" aria-expanded="false">Services</button>
+              <ul class="submenu">
+                <li><a href="#">Web Design</a></li>
+                <li><a href="#">Branding</a></li>
+                <li><a href="#">Development</a></li>
+              </ul>
+            </li>
+            <li class="stagger"><a href="#" role="menuitem">Work</a></li>
+            <li class="stagger"><a href="#" role="menuitem">About</a></li>
+            <li class="stagger"><a href="#" role="menuitem">Contact</a></li>
+          </ul>
+        </div>
+
+        <div class="menu-right">
+          <div class="meta-block">
+            <h4>Contact</h4>
+            <p><a href="mailto:hello@mybrand.com">hello@mybrand.com</a></p>
+            <p>+62 812-3456-7890</p>
+          </div>
+          <div class="meta-block">
+            <h4>Social</h4>
+            <ul class="social">
+              <li><a href="#" aria-label="Instagram">Instagram</a></li>
+              <li><a href="#" aria-label="Dribbble">Dribbble</a></li>
+              <li><a href="#" aria-label="Behance">Behance</a></li>
+              <li><a href="#" aria-label="LinkedIn">LinkedIn</a></li>
+            </ul>
+          </div>
+          <div class="meta-block small">
+            <h4>Availability</h4>
+            <p>Available for new projects</p>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Content for testing -->
+    <main class="content">
+      <h1>Fixed Navbar Menu</h1>
+      <p>This is a test page to demonstrate the fixed navbar menu functionality. Click the hamburger menu button in the top-right corner to open the fullscreen menu.</p>
+      <p>The menu includes:</p>
+      <ul>
+        <li>Toggle functionality with the hamburger button</li>
+        <li>Click outside to close (backdrop click)</li>
+        <li>Escape key to close</li>
+        <li>Submenu functionality for Services</li>
+        <li>Smooth animations and transitions</li>
+        <li>Responsive design</li>
+        <li>Accessibility features</li>
+      </ul>
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+      <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+    </main>
+
+    <script>
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggle = document.getElementById('nav-toggle');
+            const menu = document.getElementById('menu');
+            const backdrop = document.getElementById('menu-backdrop');
+            const hasSubs = document.querySelectorAll('.has-sub');
+            const htmlEl = document.documentElement;
+
+            // Toggle menu function
+            function setMenu(open) {
+                menu.classList.toggle('open', open);
+                toggle.classList.toggle('open', open);
+                toggle.setAttribute('aria-expanded', String(open));
+                menu.setAttribute('aria-hidden', String(!open));
+                htmlEl.classList.toggle('body-lock', open);
+            }
+
+            // Event listeners
+            if (toggle) {
+                toggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const isOpen = menu.classList.contains('open');
+                    setMenu(!isOpen);
+                });
+            }
+
+            if (backdrop) {
+                backdrop.addEventListener('click', function() {
+                    setMenu(false);
+                });
+            }
+
+            // Keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    setMenu(false);
+                }
+            });
+
+            // Submenus
+            hasSubs.forEach(function(item) {
+                const btn = item.querySelector('.submenu-toggle');
+                if (btn) {
+                    btn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const open = item.classList.toggle('open');
+                        btn.setAttribute('aria-expanded', String(open));
+                    });
+                }
+            });
+
+            // Optional: add a subtle header background after a tiny scroll
+            const header = document.querySelector('.nav');
+            function onScroll() {
+                if (window.scrollY > 4) {
+                    header.style.background = 'rgba(10,14,18,.8)';
+                } else {
+                    header.style.background = 'rgba(10,14,18,.6)';
+                }
+            }
+            document.addEventListener('scroll', onScroll, {passive: true});
+
+            // Debug logging
+            console.log('Navbar script loaded successfully');
+            console.log('Toggle button:', toggle);
+            console.log('Menu element:', menu);
+            console.log('Backdrop element:', backdrop);
+        });
+    </script>
+</body>
+</html>
